@@ -34,18 +34,25 @@ currentDir = os.path.dirname(os.path.realpath(__file__))
 
 config = configparser.ConfigParser()
 
+# C'est une application Flask
+app = Flask(__name__)
+
+# C'est un Skill Alexa
 sb = SkillBuilder()
+skill_adapter = SkillAdapter(
+	skill=sb.create(), 
+	skill_id="amzn1.ask.skill.bd7515ac-93e7-48c6-b2b5-58dcd0fb0951", 
+	app=app)
+# Déclaration de la route
+skill_adapter.register(app=app, route="/alexa")
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-
-
+# Récup de l'ID du slot du skill
 def get_slot_id(slot):
-  # print(f"get_slot_id:{slot}")
+  # debug(f"get_slot_id:{slot}")
   try:
     if slot.resolutions is not None:
       status = slot.resolutions.resolutions_per_authority[0].status.code
-      # print(f"for {slot.name} status={status}")
+      # debug(f"for {slot.name} status={status}")
       if status == StatusCode.ER_SUCCESS_MATCH:
         id = slot.resolutions.resolutions_per_authority[0].values[0].value.id
         return id
@@ -79,7 +86,7 @@ class ParoleIntentHandler(AbstractRequestHandler):
         speech_text = "Paroles non trouvées"
         try:
             if slot_morceau is not None:
-                config.read(currentDir + "/data/songs.ini")
+                config.read(currentDir + "/conf/songs.ini")
                 if slot_couplet is not None:
                     speech_text = config.get(
                         slot_morceau, slot_couplet).replace("\n", ", ")
@@ -89,7 +96,7 @@ class ParoleIntentHandler(AbstractRequestHandler):
         except:
             speech_text = "Erreur recherche "
 
-        print(
+        debug(
             f"morceau: {slot_morceau} couplet:{slot_couplet} refrain:{slot_refrain}")
 
         handler_input.response_builder.speak(
@@ -104,7 +111,7 @@ class HelloWorldIntentHandler(AbstractRequestHandler):
         return is_intent_name("HelloWorldIntent")(handler_input)
 
     def handle(self, handler_input):
-        print("Hello World")
+        debug("Hello World")
         speech_text = "Bonjour, de la part de Karl!"
         handler_input.response_builder.speak(
             speech_text).set_should_end_session(False)
@@ -118,7 +125,7 @@ class TempoCentIntentHandler(AbstractRequestHandler):
         return is_intent_name("TempoCentIntent")(handler_input)
 
     def handle(self, handler_input):
-        print("TempoCent")
+        debug("TempoCent")
         speech_text = "OK j'envoie la Tempo 100!"
 
         requests.get(url="/player/play/drums_100.wav")
@@ -135,7 +142,7 @@ class TempoCentDixIntentHandler(AbstractRequestHandler):
         return is_intent_name("TempoCentDixIntent")(handler_input)
 
     def handle(self, handler_input):
-        print("TempoCentDix")
+        debug("TempoCentDix")
         speech_text = "OK j'envoie la Tempo 110!"
 
         requests.get(url="/player/play/drums_110.wav")
@@ -152,7 +159,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
         return is_request_type("LaunchRequest")(handler_input)
 
     def handle(self, handler_input):
-        print("LaunchRequest Karl à ton écoute")
+        debug("LaunchRequest Karl à ton écoute")
         speech_text = "Karl à ton écoute"
 
         handler_input.response_builder.speak(
@@ -166,7 +173,7 @@ class HelpIntentHandler(AbstractRequestHandler):
         return is_intent_name("AMAZON.HelpIntent")(handler_input)
 
     def handle(self, handler_input):
-        print("HelpIntent")
+        debug("HelpIntent")
         speech_text = "Tu peux me dire bonjour!"
 
         handler_input.response_builder.speak(
@@ -181,7 +188,7 @@ class CancelOrStopIntentHandler(AbstractRequestHandler):
                 is_intent_name("AMAZON.StopIntent")(handler_input))
 
     def handle(self, handler_input):
-        print("CancelOrStopIntent")
+        debug("CancelOrStopIntent")
         speech_text = "Bye!"
         requests.get(url="/alexa/player/stop")
         handler_input.response_builder.speak(
@@ -195,7 +202,7 @@ class SessionEndedRequestHandler(AbstractRequestHandler):
         return is_request_type("SessionEndedRequest")(handler_input)
 
     def handle(self, handler_input):
-        print("SessionEndedRequest")
+        debug("SessionEndedRequest")
         requests.get(url="/player/stop")
         return handler_input.response_builder.response
 
@@ -208,8 +215,7 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
         return True
 
     def handle(self, handler_input, exception):
-        print("CatchAllException")
-        logger.error(exception, exc_info=True)
+        error(exception)
         speech = "Désolé, ya un bug dans le programme de Barbichu !!"
         handler_input.response_builder.speak(speech).ask(speech)
         requests.get(url="/player/stop")
@@ -223,13 +229,14 @@ sb.add_exception_handler(CatchAllExceptionHandler())
 
 handler = sb.lambda_handler()
 
-# Tests unitaires
+def info(message):
+  app.logger.info(message)
+def error(message):
+  app.logger.error(message)
+def debug(message):
+  app.logger.debug(message)
+
+# Test unitaires
 if __name__ == '__main__':
-  # global app
-  app = Flask(__name__)
-  skill_adapter = SkillAdapter(
-    skill=sb.create(), 
-    skill_id="amzn1.ask.skill.bd7515ac-93e7-48c6-b2b5-58dcd0fb0951", 
-    app=app)
-  skill_adapter.register(app=app, route="/alexa")
-  app.run()
+  info("Alexa en marche...")
+  app.run(host='0.0.0.0', port=8088, debug=True)

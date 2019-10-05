@@ -17,7 +17,7 @@ sed "s@__APP_PATH__@$app_path@g" -i alexa.service
 sed "s@__APP_USER__@$app_user@g" -i alexa.service
 sed "s@__APP_GROUP__@$app_group@g" -i alexa.service
 
-sed "s@__APP_NAME__@$app_name@g" gunicorn_conf.py > gunicorn.py
+sed "s@__APP_NAME__@$app_name@g" gunicorn_model.py > gunicorn.py
 sed "s@__APP_PATH__@$app_path@g" -i gunicorn.py
 sed "s@__APP_PORT__@$app_port@g" -i gunicorn.py
 sed "s@__APP_USER__@$app_user@g" -i gunicorn.py
