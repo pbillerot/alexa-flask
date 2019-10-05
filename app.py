@@ -44,68 +44,67 @@ def accueil():
 # C'est un Skill Alexa
 sb = SkillBuilder()
 skill_adapter = SkillAdapter(
-	skill=sb.create(), 
-	skill_id="amzn1.ask.skill.bd7515ac-93e7-48c6-b2b5-58dcd0fb0951", 
-	app=app)
+  skill=sb.create(), 
+  skill_id="amzn1.ask.skill.bd7515ac-93e7-48c6-b2b5-58dcd0fb0951", 
+  app=app)
 # Déclaration de la route
 skill_adapter.register(app=app, route="/alexa")
 
-# Récup de l'ID du slot du skill
-def get_slot_id(slot):
-  # debug(f"get_slot_id:{slot}")
-  try:
-    if slot.resolutions is not None:
-      status = slot.resolutions.resolutions_per_authority[0].status.code
-      # debug(f"for {slot.name} status={status}")
-      if status == StatusCode.ER_SUCCESS_MATCH:
-        id = slot.resolutions.resolutions_per_authority[0].values[0].value.id
-        return id
+class ParoleIntentHandler(AbstractRequestHandler):
+  def get_slot_id(self, slot):
+    # debug(f"get_slot_id:{slot}")
+    try:
+      if slot.resolutions is not None:
+        status = slot.resolutions.resolutions_per_authority[0].status.code
+        # debug(f"for {slot.name} status={status}")
+        if status == StatusCode.ER_SUCCESS_MATCH:
+          id = slot.resolutions.resolutions_per_authority[0].values[0].value.id
+          return id
+        else:
+          return None
       else:
         return None
-    else:
+    except:
+      print(f"ERROR slot:{slot}")
       return None
-  except:
-    print(f"ERROR slot:{slot}")
-    return None
 
-class ParoleIntentHandler(AbstractRequestHandler):
-    def can_handle(self, handler_input):
-        return is_intent_name("ParoleIntent")(handler_input)
+  def can_handle(self, handler_input):
+      return is_intent_name("ParoleIntent")(handler_input)
 
-    def handle(self, handler_input):
-        slots = handler_input.request_envelope.request.intent.slots
-        slot_morceau = None
-        slot_couplet = None
-        slot_refrain = None
-        morceau = "Morceau"
-        couplet = "Couplet"
-        refrain = "Refrain"
-        if morceau in slots:
-            slot_morceau = get_slot_id(slots[morceau])
-        if couplet in slots:
-            slot_couplet = get_slot_id(slots[couplet])
-        if refrain in slots:
-            slot_refrain = get_slot_id(slots[refrain])
+  def handle(self, handler_input):
+      slots = handler_input.request_envelope.request.intent.slots
+      slot_morceau = None
+      slot_couplet = None
+      slot_refrain = None
+      morceau = "Morceau"
+      couplet = "Couplet"
+      refrain = "Refrain"
+      if morceau in slots:
+          slot_morceau = self.get_slot_id(slots[morceau])
+      if couplet in slots:
+          slot_couplet = self.get_slot_id(slots[couplet])
+      if refrain in slots:
+          slot_refrain = self.get_slot_id(slots[refrain])
 
-        speech_text = "Paroles non trouvées"
-        try:
-            if slot_morceau is not None:
-                config.read(currentDir + "/conf/songs.ini")
-                if slot_couplet is not None:
-                    speech_text = config.get(
-                        slot_morceau, slot_couplet).replace("\n", ", ")
-                if slot_refrain is not None:
-                    speech_text = config.get(
-                        slot_morceau, slot_refrain).replace("\n", ", ")
-        except:
-            speech_text = "Erreur recherche "
+      speech_text = "Paroles non trouvées"
+      try:
+          if slot_morceau is not None:
+              config.read(currentDir + "/conf/songs.ini")
+              if slot_couplet is not None:
+                  speech_text = config.get(
+                      slot_morceau, slot_couplet).replace("\n", ", ")
+              if slot_refrain is not None:
+                  speech_text = config.get(
+                      slot_morceau, slot_refrain).replace("\n", ", ")
+      except:
+          speech_text = "Erreur recherche "
 
-        debug(
-            f"morceau: {slot_morceau} couplet:{slot_couplet} refrain:{slot_refrain}")
+      debug(
+          f"morceau: {slot_morceau} couplet:{slot_couplet} refrain:{slot_refrain}")
 
-        handler_input.response_builder.speak(
-            speech_text).set_should_end_session(False)
-        return handler_input.response_builder.response
+      handler_input.response_builder.speak(
+          speech_text).set_should_end_session(False)
+      return handler_input.response_builder.response
 sb.add_request_handler(ParoleIntentHandler())
 
 class HelloWorldIntentHandler(AbstractRequestHandler):
@@ -132,7 +131,7 @@ class TempoCentIntentHandler(AbstractRequestHandler):
         debug("TempoCent")
         speech_text = "OK j'envoie la Tempo 100!"
 
-        requests.get(url="/player/play/drums_100.wav")
+        requests.get(url="http://127.0.0.1:8053/play/drums_100.wav")
 
         handler_input.response_builder.speak(
             speech_text).set_should_end_session(False)
@@ -149,7 +148,7 @@ class TempoCentDixIntentHandler(AbstractRequestHandler):
         debug("TempoCentDix")
         speech_text = "OK j'envoie la Tempo 110!"
 
-        requests.get(url="/player/play/drums_110.wav")
+        requests.get(url="http://127.0.0.1:8053/play/drums_110.wav")
 
         handler_input.response_builder.speak(
             speech_text).set_should_end_session(False)
@@ -245,6 +244,4 @@ if __name__ == '__main__':
   app.run(host='0.0.0.0', port=8088, debug=True)
 
 info("Alexa en marche...")
-debug("Alexa en marche...")
-error("Alexa en marche...")
 
