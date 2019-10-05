@@ -23,19 +23,23 @@ from ask_sdk_model.ui import SimpleCard
 from ask_sdk_model import Response
 from ask_sdk_model.slu.entityresolution import StatusCode
 
-from flask import Flask
+from flask import Flask, jsonify
 from flask_ask_sdk.skill_adapter import SkillAdapter
 
 import requests
 import configparser
 import os
-import pprint
-currentDir = os.path.dirname(os.path.realpath(__file__))
 
+currentDir = os.path.dirname(os.path.realpath(__file__))
 config = configparser.ConfigParser()
 
 # C'est une application Flask
 app = Flask(__name__)
+@app.route('/alexa') # capture du mode GET seulement
+def accueil():
+  message = "Alexa a votre ecoute..."
+  info(message)
+  return jsonify(message)
 
 # C'est un Skill Alexa
 sb = SkillBuilder()
@@ -238,5 +242,9 @@ def debug(message):
 
 # Test unitaires
 if __name__ == '__main__':
-  info("Alexa en marche...")
   app.run(host='0.0.0.0', port=8088, debug=True)
+
+info("Alexa en marche...")
+debug("Alexa en marche...")
+error("Alexa en marche...")
+
