@@ -30,6 +30,8 @@ import requests
 import configparser
 import os
 
+from conf.app_conf import URL_PLAYER
+
 currentDir = os.path.dirname(os.path.realpath(__file__))
 config = configparser.ConfigParser()
 
@@ -40,15 +42,31 @@ def accueil():
   message = "Alexa a votre ecoute..."
   info(message)
   return jsonify(message)
+@app.route('/alexa/play/<fileName>')
+def play(fileName):
+  url = f"{URL_PLAYER}/play/{fileName}"
+  message = f"Player {url}"
+  info(message)
+  requests.get(url=url)
+  return jsonify(message)
+@app.route('/alexa/stop')
+def stop():
+  url = f"{URL_PLAYER}/stop"
+  message = f"Player {url}"
+  info(message)
+  requests.get(url=url)
+  return jsonify(message)
+
+sb = SkillBuilder()
 
 # C'est un Skill Alexa
-sb = SkillBuilder()
-skill_adapter = SkillAdapter(
-  skill=sb.create(), 
-  skill_id="amzn1.ask.skill.bd7515ac-93e7-48c6-b2b5-58dcd0fb0951", 
-  app=app)
-# Déclaration de la route
-skill_adapter.register(app=app, route="/alexa")
+def create_skill():
+  skill_adapter = SkillAdapter(
+    skill=sb.create(), 
+    skill_id="amzn1.ask.skill.bd7515ac-93e7-48c6-b2b5-58dcd0fb0951", 
+    app=app)
+  # Déclaration de la route
+  skill_adapter.register(app=app, route="/alexa")
 
 class ParoleIntentHandler(AbstractRequestHandler):
   def get_slot_id(self, slot):
@@ -69,7 +87,7 @@ class ParoleIntentHandler(AbstractRequestHandler):
       return None
 
   def can_handle(self, handler_input):
-      return is_intent_name("ParoleIntent")(handler_input)
+    return is_intent_name("ParoleIntent")(handler_input)
 
   def handle(self, handler_input):
       slots = handler_input.request_envelope.request.intent.slots
@@ -107,6 +125,56 @@ class ParoleIntentHandler(AbstractRequestHandler):
       return handler_input.response_builder.response
 sb.add_request_handler(ParoleIntentHandler())
 
+class TempoIntentHandler(AbstractRequestHandler):
+  def get_slot_id(self, slot):
+    # debug(f"get_slot_id:{slot}")
+    try:
+      if slot.resolutions is not None:
+        status = slot.resolutions.resolutions_per_authority[0].status.code
+        # debug(f"for {slot.name} status={status}")
+        if status == StatusCode.ER_SUCCESS_MATCH:
+          id = slot.resolutions.resolutions_per_authority[0].values[0].value.id
+          return id
+        else:
+          return None
+      else:
+        return None
+    except:
+      print(f"ERROR slot:{slot}")
+      return None
+
+  def can_handle(self, handler_input):
+    return is_intent_name("TempoIntent")(handler_input)
+
+  def handle(self, handler_input):
+      slots = handler_input.request_envelope.request.intent.slots
+      slot_tempo = None
+      tempo = "Tempo"
+      if tempo in slots:
+        slot_tempo = self.get_slot_id(slots[tempo])
+
+      speech_text = "ok"
+      morceau = "???"
+      try:
+        if slot_tempo is not None:
+          config.read(currentDir + "/conf/player.ini")
+          morceau = config.get("tempo", slot_tempo)
+          if morceau == "stop":
+            requests.get(url=f"{URL_PLAYER}/stop")
+          else:
+            requests.get(url=f"{URL_PLAYER}/play/{morceau}")
+        else:
+          speech_text = "Je n'ai pas trouvé le morceau"
+      except:
+          speech_text = "Ya un bug"
+
+      debug(f"tempo: {slot_tempo} : {morceau}")
+
+      handler_input.response_builder.speak(
+          speech_text).set_should_end_session(False)
+      return handler_input.response_builder.response
+sb.add_request_handler(TempoIntentHandler())
+
 class HelloWorldIntentHandler(AbstractRequestHandler):
     """Handler for Hello World Intent."""
 
@@ -131,7 +199,7 @@ class TempoCentIntentHandler(AbstractRequestHandler):
         debug("TempoCent")
         speech_text = "OK j'envoie la Tempo 100!"
 
-        requests.get(url="http://127.0.0.1:8053/play/drums_100.wav")
+        requests.get(url=f"{URL_PLAYER}/play/drums_100.wav")
 
         handler_input.response_builder.speak(
             speech_text).set_should_end_session(False)
@@ -148,12 +216,26 @@ class TempoCentDixIntentHandler(AbstractRequestHandler):
         debug("TempoCentDix")
         speech_text = "OK j'envoie la Tempo 110!"
 
-        requests.get(url="http://127.0.0.1:8053/play/drums_110.wav")
+        requests.get(url=f"{URL_PLAYER}/play/drums_110.wav")
 
         handler_input.response_builder.speak(
             speech_text).set_should_end_session(False)
         return handler_input.response_builder.response
 sb.add_request_handler(TempoCentDixIntentHandler())
+
+class TempoStopIntentHandler(AbstractRequestHandler):
+    def can_handle(self, handler_input):
+        return is_intent_name("TempoStopIntent")(handler_input)
+    def handle(self, handler_input):
+        debug("TempoStop")
+        speech_text = "OK j'arrête la musique"
+
+        requests.get(url=f"{URL_PLAYER}/stop")
+
+        handler_input.response_builder.speak(
+            speech_text).set_should_end_session(False)
+        return handler_input.response_builder.response
+sb.add_request_handler(TempoStopIntentHandler())
 
 class LaunchRequestHandler(AbstractRequestHandler):
     """Handler for Skill Launch."""
@@ -162,7 +244,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
         return is_request_type("LaunchRequest")(handler_input)
 
     def handle(self, handler_input):
-        debug("LaunchRequest Karl à ton écoute")
+        info("LaunchRequest Karl à ton écoute")
         speech_text = "Karl à ton écoute"
 
         handler_input.response_builder.speak(
@@ -193,7 +275,7 @@ class CancelOrStopIntentHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         debug("CancelOrStopIntent")
         speech_text = "Bye!"
-        requests.get(url="/alexa/player/stop")
+        requests.get(url=f"{URL_PLAYER}/stop")
         handler_input.response_builder.speak(
             speech_text).set_should_end_session(True)
         return handler_input.response_builder.response
@@ -206,7 +288,7 @@ class SessionEndedRequestHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         debug("SessionEndedRequest")
-        requests.get(url="/player/stop")
+        requests.get(url=f"{URL_PLAYER}/stop")
         return handler_input.response_builder.response
 
 class CatchAllExceptionHandler(AbstractExceptionHandler):
@@ -221,7 +303,7 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
         error(exception)
         speech = "Désolé, ya un bug dans le programme de Barbichu !!"
         handler_input.response_builder.speak(speech).ask(speech)
-        requests.get(url="/player/stop")
+        requests.get(url=f"{URL_PLAYER}/stop")
         return handler_input.response_builder.response
 
 sb.add_request_handler(LaunchRequestHandler())
@@ -229,8 +311,6 @@ sb.add_request_handler(HelpIntentHandler())
 sb.add_request_handler(CancelOrStopIntentHandler())
 sb.add_request_handler(SessionEndedRequestHandler())
 sb.add_exception_handler(CatchAllExceptionHandler())
-
-handler = sb.lambda_handler()
 
 def info(message):
   app.logger.info(message)
@@ -243,5 +323,8 @@ def debug(message):
 if __name__ == '__main__':
   app.run(host='0.0.0.0', port=8088, debug=True)
 
+handler = sb.lambda_handler()
+create_skill()
+app.logger.setLevel(logging.DEBUG)
 info("Alexa en marche...")
 

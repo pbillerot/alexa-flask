@@ -1,0 +1,245 @@
+{
+  "interactionModel": {
+      "languageModel": {
+          "invocationName": "karl",
+          "intents": [
+              {
+                  "name": "AMAZON.CancelIntent",
+                  "samples": []
+              },
+              {
+                  "name": "AMAZON.HelpIntent",
+                  "samples": []
+              },
+              {
+                  "name": "AMAZON.StopIntent",
+                  "samples": []
+              },
+              {
+                  "name": "AMAZON.NavigateHomeIntent",
+                  "samples": []
+              },
+              {
+                  "name": "AMAZON.PauseIntent",
+                  "samples": []
+              },
+              {
+                  "name": "AMAZON.ResumeIntent",
+                  "samples": []
+              },
+              {
+                  "name": "HelloWorldIntent",
+                  "slots": [],
+                  "samples": [
+                      "comment tu vas",
+                      "bonjour",
+                      "hello"
+                  ]
+              },
+              {
+                  "name": "TempoIntent",
+                  "slots": [
+                      {
+                          "name": "Tempo",
+                          "type": "tempo"
+                      }
+                  ],
+                  "samples": [
+                      "joue {Tempo}",
+                      "envoie {Tempo}",
+                      "envoie le {Tempo}",
+                      "envoie le tempo {Tempo}",
+                      "tempo {Tempo}"
+                  ]
+              },
+              {
+                  "name": "ParoleIntent",
+                  "slots": [
+                      {
+                          "name": "Morceau",
+                          "type": "morceau"
+                      },
+                      {
+                          "name": "Couplet",
+                          "type": "couplet"
+                      },
+                      {
+                          "name": "Refrain",
+                          "type": "refrain"
+                      }
+                  ],
+                  "samples": [
+                      "parole {Morceau} le {Refrain} refrain",
+                      "parole {Morceau} le {Couplet} couplet",
+                      "parole {Morceau} couplet {Couplet}",
+                      "parole {Morceau} couplet numéro {Couplet}",
+                      "parole {Morceau} refrain {Refrain}",
+                      "parole {Morceau} refrain numéro {Refrain}"
+                  ]
+              }
+          ],
+          "types": [
+              {
+                  "name": "morceau",
+                  "values": [
+                      {
+                          "id": "AmourMachine",
+                          "name": {
+                              "value": "amour machine",
+                              "synonyms": [
+                                  "machine",
+                                  "amour"
+                              ]
+                          }
+                      },
+                      {
+                          "id": "RiveGauche",
+                          "name": {
+                              "value": "rive gauche",
+                              "synonyms": [
+                                  "rive",
+                                  "gauche"
+                              ]
+                          }
+                      },
+                      {
+                          "id": "FouleSentimentale",
+                          "name": {
+                              "value": "foule sentimentale",
+                              "synonyms": [
+                                  "foule",
+                                  "sentimentale"
+                              ]
+                          }
+                      }
+                  ]
+              },
+              {
+                  "name": "couplet",
+                  "values": [
+                      {
+                          "id": "c3",
+                          "name": {
+                              "value": "trois",
+                              "synonyms": [
+                                  "troisième"
+                              ]
+                          }
+                      },
+                      {
+                          "id": "c2",
+                          "name": {
+                              "value": "deux",
+                              "synonyms": [
+                                  "deuxième"
+                              ]
+                          }
+                      },
+                      {
+                          "id": "c1",
+                          "name": {
+                              "value": "un",
+                              "synonyms": [
+                                  "premier"
+                              ]
+                          }
+                      }
+                  ]
+              },
+              {
+                  "name": "refrain",
+                  "values": [
+                      {
+                          "id": "r3",
+                          "name": {
+                              "value": "trois",
+                              "synonyms": [
+                                  "troisième"
+                              ]
+                          }
+                      },
+                      {
+                          "id": "r2",
+                          "name": {
+                              "value": "deux",
+                              "synonyms": [
+                                  "deuxième"
+                              ]
+                          }
+                      },
+                      {
+                          "id": "r1",
+                          "name": {
+                              "value": "un",
+                              "synonyms": [
+                                  "premier"
+                              ]
+                          }
+                      }
+                  ]
+              },
+              {
+                  "name": "tempo",
+                  "values": [
+                      {
+                          "id": "t117",
+                          "name": {
+                              "value": "cent dix sept"
+                          }
+                      },
+                      {
+                          "id": "t100",
+                          "name": {
+                              "value": "cent"
+                          }
+                      },
+                      {
+                          "id": "t110",
+                          "name": {
+                              "value": "cent dix"
+                          }
+                      },
+                      {
+                          "id": "fille_pere_noel",
+                          "name": {
+                              "value": "fille du père noël",
+                              "synonyms": [
+                                  "la fille deu père noël",
+                                  "dutronc"
+                              ]
+                          }
+                      },
+                      {
+                          "id": "big_get_plane",
+                          "name": {
+                              "value": "big jet plane",
+                              "synonyms": [
+                                  "plane",
+                                  "jet plane"
+                              ]
+                          }
+                      },
+                      {
+                          "id": "la_grange",
+                          "name": {
+                              "value": "la grange",
+                              "synonyms": [
+                                  "zztop"
+                              ]
+                          }
+                      },
+                      {
+                          "id": "tempo_stop",
+                          "name": {
+                              "value": "stop",
+                              "synonyms": [
+                                  "arrête"
+                              ]
+                          }
+                      }
+                  ]
+              }
+          ]
+      }
+  }
+}
