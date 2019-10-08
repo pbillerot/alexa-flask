@@ -154,7 +154,7 @@ class TempoIntentHandler(AbstractRequestHandler):
       if tempo in slots:
         slot_tempo = self.get_slot_id(slots[tempo])
 
-      speech_text = "ok"
+      speech_text = ""
       morceau = "???"
       try:
         if slot_tempo is not None:
@@ -171,19 +171,19 @@ class TempoIntentHandler(AbstractRequestHandler):
       return handler_input.response_builder.response
 sb.add_request_handler(TempoIntentHandler())
 
-class HelloWorldIntentHandler(AbstractRequestHandler):
-    """Handler for Hello World Intent."""
+class HelloIntentHandler(AbstractRequestHandler):
+    """Handler for Hello Intent."""
 
     def can_handle(self, handler_input):
-        return is_intent_name("HelloWorldIntent")(handler_input)
+        return is_intent_name("HelloIntent")(handler_input)
 
     def handle(self, handler_input):
-        debug("Hello World")
-        speech_text = "Bonjour, de la part de Karl!"
+        debug("Hello")
+        speech_text = "Bonjour, le métro est en gare"
         handler_input.response_builder.speak(
             speech_text).set_should_end_session(False)
         return handler_input.response_builder.response
-sb.add_request_handler(HelloWorldIntentHandler())
+sb.add_request_handler(HelloIntentHandler())
 
 """
   Request alexa obligatoire
@@ -195,8 +195,8 @@ class LaunchRequestHandler(AbstractRequestHandler):
         return is_request_type("LaunchRequest")(handler_input)
 
     def handle(self, handler_input):
-        info("LaunchRequest Karl à ton écoute")
-        speech_text = "Karl à ton écoute"
+        info("LaunchRequest Métro")
+        speech_text = "Ok le métro est en gare"
 
         handler_input.response_builder.speak(
             speech_text).set_should_end_session(False)
@@ -239,7 +239,8 @@ class SessionEndedRequestHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         debug("SessionEndedRequest")
-        requests.get(url=f"{URL_PLAYER}/stop")
+        debug(handler_input)
+        # requests.get(url=f"{URL_PLAYER}/stop")
         return handler_input.response_builder.response
 
 class CatchAllExceptionHandler(AbstractExceptionHandler):
