@@ -148,6 +148,7 @@ class TempoIntentHandler(AbstractRequestHandler):
 
   def handle(self, handler_input):
       slots = handler_input.request_envelope.request.intent.slots
+      # debug(slots)
       slot_tempo = None
       tempo = "Tempo"
       if tempo in slots:
@@ -157,18 +158,13 @@ class TempoIntentHandler(AbstractRequestHandler):
       morceau = "???"
       try:
         if slot_tempo is not None:
-          config.read(currentDir + "/conf/player.ini")
-          morceau = config.get("tempo", slot_tempo)
-          if morceau == "stop":
-            requests.get(url=f"{URL_PLAYER}/stop")
-          else:
-            requests.get(url=f"{URL_PLAYER}/play/{morceau}")
+          requests.get(url=f"{URL_PLAYER}/play/{slot_tempo}")
         else:
           speech_text = "Je n'ai pas trouvé le morceau"
       except:
           speech_text = "Ya un bug"
 
-      debug(f"tempo: {slot_tempo} : {morceau}")
+      debug(f"player: {slot_tempo}")
 
       handler_input.response_builder.speak(
           speech_text).set_should_end_session(False)
