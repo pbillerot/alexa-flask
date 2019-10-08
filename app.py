@@ -59,7 +59,7 @@ def stop():
 
 sb = SkillBuilder()
 
-# C'est un Skill Alexa
+# Initialisation du Skill
 def create_skill():
   skill_adapter = SkillAdapter(
     skill=sb.create(), 
@@ -185,54 +185,9 @@ class HelloWorldIntentHandler(AbstractRequestHandler):
         return handler_input.response_builder.response
 sb.add_request_handler(HelloWorldIntentHandler())
 
-class TempoCentIntentHandler(AbstractRequestHandler):
-    """Handler for Tempo 100 Intent."""
-
-    def can_handle(self, handler_input):
-        return is_intent_name("TempoCentIntent")(handler_input)
-
-    def handle(self, handler_input):
-        debug("TempoCent")
-        speech_text = "OK j'envoie la Tempo 100!"
-
-        requests.get(url=f"{URL_PLAYER}/play/drums_100.wav")
-
-        handler_input.response_builder.speak(
-            speech_text).set_should_end_session(False)
-        return handler_input.response_builder.response
-sb.add_request_handler(TempoCentIntentHandler())
-
-class TempoCentDixIntentHandler(AbstractRequestHandler):
-    """Handler for Tempo 110 Intent."""
-
-    def can_handle(self, handler_input):
-        return is_intent_name("TempoCentDixIntent")(handler_input)
-
-    def handle(self, handler_input):
-        debug("TempoCentDix")
-        speech_text = "OK j'envoie la Tempo 110!"
-
-        requests.get(url=f"{URL_PLAYER}/play/drums_110.wav")
-
-        handler_input.response_builder.speak(
-            speech_text).set_should_end_session(False)
-        return handler_input.response_builder.response
-sb.add_request_handler(TempoCentDixIntentHandler())
-
-class TempoStopIntentHandler(AbstractRequestHandler):
-    def can_handle(self, handler_input):
-        return is_intent_name("TempoStopIntent")(handler_input)
-    def handle(self, handler_input):
-        debug("TempoStop")
-        speech_text = "OK j'arrête la musique"
-
-        requests.get(url=f"{URL_PLAYER}/stop")
-
-        handler_input.response_builder.speak(
-            speech_text).set_should_end_session(False)
-        return handler_input.response_builder.response
-sb.add_request_handler(TempoStopIntentHandler())
-
+"""
+  Request alexa obligatoire
+"""
 class LaunchRequestHandler(AbstractRequestHandler):
     """Handler for Skill Launch."""
 
