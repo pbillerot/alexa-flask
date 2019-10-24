@@ -170,7 +170,7 @@ class ParoleIntentHandler(AbstractRequestHandler):
       return handler_input.response_builder.response
 sb.add_request_handler(ParoleIntentHandler())
 
-class TempoIntentHandler(AbstractRequestHandler):
+class AllureIntentHandler(AbstractRequestHandler):
   def get_slot_id(self, slot):
     # debug(f"get_slot_id:{slot}")
     try:
@@ -189,31 +189,31 @@ class TempoIntentHandler(AbstractRequestHandler):
       return None
 
   def can_handle(self, handler_input):
-    return is_intent_name("TempoIntent")(handler_input)
+    return is_intent_name("AllureIntent")(handler_input)
 
   def handle(self, handler_input):
       slots = handler_input.request_envelope.request.intent.slots
       # debug(slots)
-      slot_tempo = None
-      tempo = "Tempo"
-      if tempo in slots:
-        slot_tempo = self.get_slot_id(slots[tempo])
+      slot_allure = None
+      allure = "Allure"
+      if allure in slots:
+        slot_allure = self.get_slot_id(slots[allure])
 
       speech_text = ""
       try:
-        if slot_tempo is not None:
-          requests.get(url=f"{URL_PLAYER}/play/{slot_tempo}")
+        if slot_allure is not None:
+          requests.get(url=f"{URL_PLAYER}/play/{slot_allure}")
         else:
           speech_text = "Je n'ai pas trouvé le morceau"
       except:
           speech_text = "Ya un bug"
 
-      debug(f"player: {slot_tempo}")
+      debug(f"player: {slot_allure}")
 
       handler_input.response_builder.speak(
           speech_text).set_should_end_session(False)
       return handler_input.response_builder.response
-sb.add_request_handler(TempoIntentHandler())
+sb.add_request_handler(AllureIntentHandler())
 
 class HelloIntentHandler(AbstractRequestHandler):
     """Handler for Hello Intent."""
@@ -320,5 +320,6 @@ if __name__ == '__main__':
   app.run(host='0.0.0.0', port=8088, debug=True)
 
 handler = sb.lambda_handler()
+app.logger.setLevel(logging.ERROR)
 create_skill()
 info("Alexa en marche...")
