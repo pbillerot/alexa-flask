@@ -91,22 +91,22 @@ class DialogueIntentHandler(AbstractRequestHandler):
 
   def handle(self, handler_input):
       slots = handler_input.request_envelope.request.intent.slots
-      slot_requete = None
-      requete = "Requete"
-      if requete in slots:
-          slot_requete = self.get_slot_id(slots[requete])
+      slot_question = None
+      question = "Question"
+      if question in slots:
+          slot_question = self.get_slot_id(slots[question])
 
       speech_text = "Je n'ai rien à dire d'intéressant"
       try:
-          if slot_requete is not None:
-            config.read(currentDir + "/conf/requetes.ini")
+          if slot_question is not None:
+            config.read(currentDir + "/conf/questions.ini")
             speech_text = config.get(
-                "requetes", slot_requete).replace("\n", ", ")
+                "questions", slot_question).replace("\n", ", ")
       except:
           speech_text = "J'ai un trou de mémoire"
 
       debug(
-          f"requête: {slot_requete}")
+          f"Questions: {slot_question}")
 
       handler_input.response_builder.speak(
           speech_text).set_should_end_session(False)
