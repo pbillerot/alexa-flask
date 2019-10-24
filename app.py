@@ -68,6 +68,51 @@ def create_skill():
   # Déclaration de la route
   skill_adapter.register(app=app, route="/alexa")
 
+class DialogueIntentHandler(AbstractRequestHandler):
+  def get_slot_id(self, slot):
+    # debug(f"get_slot_id:{slot}")
+    try:
+      if slot.resolutions is not None:
+        status = slot.resolutions.resolutions_per_authority[0].status.code
+        # debug(f"for {slot.name} status={status}")
+        if status == StatusCode.ER_SUCCESS_MATCH:
+          id = slot.resolutions.resolutions_per_authority[0].values[0].value.id
+          return id
+        else:
+          return None
+      else:
+        return None
+    except:
+      print(f"ERROR slot:{slot}")
+      return None
+
+  def can_handle(self, handler_input):
+    return is_intent_name("DialogueIntent")(handler_input)
+
+  def handle(self, handler_input):
+      slots = handler_input.request_envelope.request.intent.slots
+      slot_requete = None
+      requete = "Requete"
+      if requete in slots:
+          slot_requete = self.get_slot_id(slots[requete])
+
+      speech_text = "Je n'ai rien à dire d'intéressant"
+      try:
+          if slot_requete is not None:
+            config.read(currentDir + "/conf/requetes.ini")
+            speech_text = config.get(
+                "requetes", slot_requete).replace("\n", ", ")
+      except:
+          speech_text = "J'ai un trou de mémoire"
+
+      debug(
+          f"requête: {slot_requete}")
+
+      handler_input.response_builder.speak(
+          speech_text).set_should_end_session(False)
+      return handler_input.response_builder.response
+sb.add_request_handler(DialogueIntentHandler())
+
 class ParoleIntentHandler(AbstractRequestHandler):
   def get_slot_id(self, slot):
     # debug(f"get_slot_id:{slot}")
@@ -277,6 +322,4 @@ if __name__ == '__main__':
 
 handler = sb.lambda_handler()
 create_skill()
-app.logger.setLevel(logging.DEBUG)
 info("Alexa en marche...")
-
