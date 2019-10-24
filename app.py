@@ -200,7 +200,6 @@ class TempoIntentHandler(AbstractRequestHandler):
         slot_tempo = self.get_slot_id(slots[tempo])
 
       speech_text = ""
-      morceau = "???"
       try:
         if slot_tempo is not None:
           requests.get(url=f"{URL_PLAYER}/play/{slot_tempo}")
